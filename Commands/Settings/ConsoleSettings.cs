@@ -18,7 +18,7 @@ namespace SQLServerPing.Commands.Settings
         }
 
         [CommandArgument(0, "<Server>")]
-        [Description("Server host or ip number")]
+        [Description("Server host or ip number. For non-standard port use the format \"server,port\"")]
         public string Server { get; set; } = "";
 
         [CommandOption("--database|-d")]
