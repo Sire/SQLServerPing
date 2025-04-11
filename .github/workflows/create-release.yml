@@ -1,0 +1,69 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on version tags like v1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: SQLServerPing
+
+    strategy:
+      matrix:
+        rid: [win-x64, osx-x64, linux-x64]  # runtime identifiers
+
+    name: Build for ${{ matrix.rid }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Set release filename
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          FILENAME="${{ env.PROJECT_NAME }}${VERSION}-${{ matrix.rid }}.zip"
+          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
+
+      - name: Publish self-contained app
+        run: |
+          dotnet publish -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -o publish/${{ matrix.rid }}
+
+      - name: Archive binary
+        run: |
+          cd publish/${{ matrix.rid }}
+          zip -r ../../$FILENAME .
+
+      - name: Upload ZIP as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FILENAME }}
+          path: ${{ env.FILENAME }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
