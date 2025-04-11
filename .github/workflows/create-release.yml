@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: SQLServerPing
 
     strategy:
       matrix:
@@ -49,14 +51,6 @@ jobs:
         with:
           name: ${{ env.FILENAME }}
           path: ${{ env.FILENAME }}
-
-#      - name: Create GitHub Release
-        #uses: softprops/action-gh-release@v1
-        #with:
-          #files: ${{ env.FILENAME }}
-        #env:
-          #GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
   release:
     needs: build
