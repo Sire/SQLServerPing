@@ -49,7 +49,7 @@ namespace SQLServerPing.Commands.Settings
         public bool Failover { get; set; } = false;
 
         [CommandOption("--failoverpartner|-a")]
-        [Description("Use a custom failover partner")]
+        [Description("Use a custom failover partner (works with Database Mirroring, not Availability Groups)")]
         public string? FailoverPartner { get; set; }
 
         [CommandOption("--nonstop|-n")]
