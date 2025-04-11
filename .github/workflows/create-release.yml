@@ -34,7 +34,7 @@ jobs:
       - name: Set release filename
         run: |
           VERSION=${GITHUB_REF_NAME}
-          FILENAME="${{ env.PROJECT_NAME }}${VERSION}-${{ matrix.rid }}.zip"
+          FILENAME="${{ env.PROJECT_NAME }}-${VERSION}-${{ matrix.rid }}.zip"
           echo "FILENAME=$FILENAME" >> $GITHUB_ENV
 
       - name: Publish self-contained app
