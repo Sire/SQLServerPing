@@ -29,8 +29,8 @@ namespace SQLServerPing.Commands
             var connString = GetConnectionString(settings);
 
             //Logger.LogInformation("");
-            AnsiConsole.MarkupLine($"ConnectionString: [teal]{connString}[/]");
-            AnsiConsole.MarkupLine($"SQL Query       : [teal]{settings.SQLCommand}[/]");
+            AnsiConsole.MarkupLine($"ConnectionString: [teal]{connString.EscapeMarkup()}[/]");
+            AnsiConsole.MarkupLine($"SQL Query       : [teal]{settings.SQLCommand.EscapeMarkup()}[/]");
 
             bool running = true;
 
@@ -45,7 +45,7 @@ namespace SQLServerPing.Commands
                     .Start("Please wait...", ctx =>
                     {
                         // Simulate some work
-                        ctx.Status($"Trying to connect to server [teal]{settings.Server}[/]...");
+                        ctx.Status($"Trying to connect to server [teal]{settings.Server.EscapeMarkup()}[/]...");
                         CallDatabase(connString, settings);
 
                         // Update the status and spinner
@@ -100,7 +100,7 @@ namespace SQLServerPing.Commands
 
         private void CallDatabase(string connString, ConsoleSettings settings)
         {
-            AnsiConsole.MarkupLine($"[teal]{DateTime.Now.ToLocalTime()}[/] Connecting to {settings.Server}... ");
+            AnsiConsole.MarkupLine($"[teal]{DateTime.Now.ToLocalTime()}[/] Connecting to {settings.Server.EscapeMarkup()}... ");
 
             try
             {
@@ -122,7 +122,7 @@ namespace SQLServerPing.Commands
                             }
                         }
                     }
-                    AnsiConsole.MarkupLine($"  [green]SUCCESS[/] {sb}");
+                    AnsiConsole.MarkupLine($"  [green]SUCCESS[/] {sb.ToString().EscapeMarkup()}");
                 }
             }
             catch (SqlException ex)
