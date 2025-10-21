@@ -19,7 +19,7 @@ namespace SQLServerPing.Commands
         public override async Task<int> ExecuteAsync(CommandContext context, ConsoleSettings settings)
         {
             if (settings.SQLCommand == null)
-                settings.SQLCommand = $@"SELECT @@SERVERNAME AS ""Server"", name as ""Database"", state_desc AS ""State"", replica_id AS ""Replica"" FROM sys.databases WHERE name = '{settings.Database}' ";
+                settings.SQLCommand = @"SELECT @@SERVERNAME AS ""Server"", name as ""Database"", state_desc AS ""State"", replica_id AS ""Replica"" FROM sys.databases WHERE name = @DatabaseName";
 
             //Logger.LogInformation("Connection string: {Mandatory}", connectionString);
             //Logger.LogInformation("SQL Command: {Optional}", settings.SQLCommand);
@@ -104,13 +104,19 @@ namespace SQLServerPing.Commands
 
             try
             {
-  
+
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
                     connection.Open();
                     var sb = new StringBuilder();
                     using (SqlCommand command = new SqlCommand(settings.SQLCommand, connection))
                     {
+                        // Add parameter if the query contains @DatabaseName placeholder
+                        if (settings.SQLCommand.Contains("@DatabaseName"))
+                        {
+                            command.Parameters.AddWithValue("@DatabaseName", settings.Database);
+                        }
+
                         using (SqlDataReader reader = command.ExecuteReader())
                         {
                             while (reader.Read())
