@@ -21,6 +21,9 @@ namespace SQLServerPing.Commands
             if (settings.SQLCommand == null)
                 settings.SQLCommand = @"SELECT @@SERVERNAME AS ""Server"", name as ""Database"", state_desc AS ""State"", replica_id AS ""Replica"" FROM sys.databases WHERE name = @DatabaseName";
 
+            // Apply secure credential handling
+            ApplySecureCredentials(settings);
+
             //Logger.LogInformation("Connection string: {Mandatory}", connectionString);
             //Logger.LogInformation("SQL Command: {Optional}", settings.SQLCommand);
             //Logger.LogInformation("CommandOptionFlag: {CommandOptionFlag}", settings.CommandOptionFlag);
@@ -70,6 +73,44 @@ namespace SQLServerPing.Commands
             //if (settings.Wait < 1)
             //    return ValidationResult.Error("...");
             return ValidationResult.Success();
+        }
+
+        private static void ApplySecureCredentials(ConsoleSettings settings)
+        {
+            // Check for credentials from environment variables first
+            var envUsername = Environment.GetEnvironmentVariable("SQLPING_USERNAME");
+            var envPassword = Environment.GetEnvironmentVariable("SQLPING_PASSWORD");
+
+            bool passwordProvidedViaCommandLine = !string.IsNullOrEmpty(settings.Password);
+
+            // Use environment variables if command line values are not provided
+            if (string.IsNullOrEmpty(settings.Username) && !string.IsNullOrEmpty(envUsername))
+            {
+                settings.Username = envUsername;
+                AnsiConsole.MarkupLine("[yellow]Using username from SQLPING_USERNAME environment variable[/]");
+            }
+
+            if (string.IsNullOrEmpty(settings.Password) && !string.IsNullOrEmpty(envPassword))
+            {
+                settings.Password = envPassword;
+                AnsiConsole.MarkupLine("[yellow]Using password from SQLPING_PASSWORD environment variable[/]");
+            }
+
+            // If username is provided but password is not, prompt for password
+            if (!string.IsNullOrEmpty(settings.Username) && string.IsNullOrEmpty(settings.Password))
+            {
+                settings.Password = AnsiConsole.Prompt(
+                    new TextPrompt<string>("[yellow]Password:[/]")
+                        .PromptStyle("red")
+                        .Secret());
+            }
+
+            // Warn if password was provided via command line (security risk)
+            if (passwordProvidedViaCommandLine)
+            {
+                AnsiConsole.MarkupLine("[yellow]WARNING: Password provided via command line is visible in process list and shell history.[/]");
+                AnsiConsole.MarkupLine("[yellow]Consider using SQLPING_PASSWORD environment variable or interactive prompt instead.[/]");
+            }
         }
 
         private static string GetConnectionString(ConsoleSettings settings) {
