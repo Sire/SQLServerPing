@@ -38,21 +38,21 @@ namespace SQLServerPing.Commands
             {
 
                 int sec = settings.Wait;
-                AnsiConsole.Status()
+                await AnsiConsole.Status()
                     .AutoRefresh(true)
                     .Spinner(Spinner.Known.Dots) // https://jsfiddle.net/sindresorhus/2eLtsbey/embedded/result/
                     .SpinnerStyle(Style.Parse("green bold"))
-                    .Start("Please wait...", ctx =>
+                    .StartAsync("Please wait...", async ctx =>
                     {
                         // Simulate some work
                         ctx.Status($"Trying to connect to server [teal]{settings.Server.EscapeMarkup()}[/]...");
-                        CallDatabase(connString, settings);
+                        await CallDatabaseAsync(connString, settings);
 
                         // Update the status and spinner
                         ctx.Status($"Waiting [teal]{sec}[/] seconds...");
 
                         if (settings.NonStop)
-                            Thread.Sleep(TimeSpan.FromSeconds(sec));
+                            await Task.Delay(TimeSpan.FromSeconds(sec));
                         else
                             running = false;
                     });
@@ -119,7 +119,7 @@ namespace SQLServerPing.Commands
             }
         }
 
-        private void CallDatabase(string connString, ConsoleSettings settings)
+        private async Task CallDatabaseAsync(string connString, ConsoleSettings settings)
         {
             AnsiConsole.MarkupLine($"[teal]{DateTime.Now.ToLocalTime()}[/] Connecting to {settings.Server.EscapeMarkup()}... ");
 
@@ -128,7 +128,7 @@ namespace SQLServerPing.Commands
 
                 using (SqlConnection connection = new SqlConnection(connString))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     var sb = new StringBuilder();
                     using (SqlCommand command = new SqlCommand(settings.SQLCommand, connection))
                     {
@@ -138,9 +138,9 @@ namespace SQLServerPing.Commands
                             command.Parameters.AddWithValue("@DatabaseName", settings.Database);
                         }
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            while (await reader.ReadAsync())
                             {
                                 for (int i = 0; i < reader.FieldCount; i++)
                                     if (reader.GetValue(i) != DBNull.Value)
