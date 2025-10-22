@@ -29,7 +29,7 @@ namespace SQLServerPing.Commands
             var connString = GetConnectionString(settings);
 
             //Logger.LogInformation("");
-            AnsiConsole.MarkupLine($"ConnectionString: [teal]{connString.EscapeMarkup()}[/]");
+            AnsiConsole.MarkupLine($"ConnectionString: [teal]{RedactConnectionString(connString).EscapeMarkup()}[/]");
             AnsiConsole.MarkupLine($"SQL Query       : [teal]{settings.SQLCommand.EscapeMarkup()}[/]");
 
             bool running = true;
@@ -96,6 +96,27 @@ namespace SQLServerPing.Commands
 
             string connString = builder.ConnectionString;
             return connString;
+        }
+
+        private static string RedactConnectionString(string connectionString)
+        {
+            try
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+
+                // Redact password if present
+                if (!string.IsNullOrEmpty(builder.Password))
+                {
+                    builder.Password = "***REDACTED***";
+                }
+
+                return builder.ConnectionString;
+            }
+            catch
+            {
+                // If parsing fails, return a generic redacted message
+                return "***CONNECTION STRING REDACTED***";
+            }
         }
 
         private void CallDatabase(string connString, ConsoleSettings settings)
