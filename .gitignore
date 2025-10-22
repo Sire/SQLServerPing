@@ -361,4 +361,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+
+# Custom
 /Properties/launchSettings.json
+
+# Private todo list
+TODO.md
