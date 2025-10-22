@@ -20,7 +20,7 @@ This is a .NET console app and should run fine on [all supported operating syste
     -c, --command                       SQL Command (default will return database information)
     -f, --failover                      This is a failover cluster / availability group, use MultiSubnetFailover=true
     -a, --failoverpartner               Use a custom failover partner
-    -n, --nonstop                       Set this to true to continously ping the server. Default is ping once
+    -n, --nonstop                       Set this to true to continuously ping the server. Default is ping once
     -w, --wait <SECONDS>     10         How long to wait, in seconds, between non-stop pings
     --encrypt <VALUE>        true       Encryption mode: true|false|strict
     -T, --trust-server-certificate      Trust server certificate without validation (DEV ONLY)
