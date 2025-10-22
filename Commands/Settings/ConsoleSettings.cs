@@ -62,6 +62,24 @@ namespace SQLServerPing.Commands.Settings
         [DefaultValue(10)]
         public int Wait { get; set; }
 
+        // TLS-related options
+        [CommandOption("--encrypt <true|false|strict>")]
+        [Description("Encrypt mode: true|false|strict. Default follows Microsoft.Data.SqlClient (true).")]
+        public string? Encrypt { get; set; }
+
+        [CommandOption("--trust-server-certificate|-T <true|false>")]
+        [Description("Set TrustServerCertificate=true (DEV ONLY). Bypasses cert validation but keeps encryption.")]
+        public bool? TrustServerCertificate { get; set; }
+
+        [CommandOption("--hostname-in-certificate|-H <name>")]
+        [Description("Override HostNameInCertificate for TLS validation (use the subject/SAN on the server certificate).")]
+        public string? HostNameInCertificate { get; set; }
+
+        [CommandOption("--no-tnir")]
+        [Description("Disable TransparentNetworkIPResolution to avoid host->IP substitution that breaks TLS name matching.")]
+        [DefaultValue(false)]
+        public bool NoTransparentNetworkIPResolution { get; set; } = false;
+
 
 
         //[CommandOption("--command-option-value <value>")]
